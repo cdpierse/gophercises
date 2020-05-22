@@ -27,8 +27,14 @@ func main() {
 	flag.Parse()
 	p := readProblems(filename)
 	q := quiz{p, 0, 0, 0}
-	q.askQuestion()
-	log.Println(q.QuestionIdx)
+	for {
+		if q.QuestionIdx == len(q.Problems){
+			break
+		}
+		q.askQuestion()
+
+	}
+
 }
 func (q *quiz) askQuestion() {
 	log.Printf("Question: What is %s ?", q.Problems[q.QuestionIdx].Question)
