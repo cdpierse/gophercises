@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 )
 
 type problem struct {
@@ -28,16 +29,24 @@ func main() {
 	p := readProblems(filename)
 	q := quiz{p, 0, 0, 0}
 	for {
-		if q.QuestionIdx == len(q.Problems){
+		if q.QuestionIdx == len(q.Problems) {
 			break
 		}
 		q.askQuestion()
-
 	}
+	log.Printf("All done, you got %v questions right and %v wrong", q.Correct, q.Incorrect)
 
 }
 func (q *quiz) askQuestion() {
 	log.Printf("Question: What is %s ?", q.Problems[q.QuestionIdx].Question)
+	reader := bufio.NewReader(os.Stdin)
+	log.Print("Enter your answer:")
+	text, _ := reader.ReadString('\n')
+	if strings.TrimSpace(text) == strings.TrimSpace(q.Problems[q.QuestionIdx].Answer) {
+		q.Correct++
+	} else {
+		q.Incorrect++
+	}
 	q.QuestionIdx++
 
 }
