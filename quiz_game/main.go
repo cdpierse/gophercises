@@ -43,10 +43,8 @@ func main() {
 				q.Incorrect,
 				len(q.Problems))
 			return
-		case _ = <-answerCh:
-
+		case <-answerCh:
 		}
-
 	}
 
 }
