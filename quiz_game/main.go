@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 type problem struct {
@@ -24,21 +25,32 @@ type quiz struct {
 
 func main() {
 	var filename string
+	var timeLimit int
 	flag.StringVar(&filename, "f", "problems.csv", "file to read problems for quiz from")
+	flag.IntVar(&timeLimit, "timelimit", 30, "time limit in seconds to solve problems within")
 	flag.Parse()
 	p := readProblems(filename)
 	q := quiz{p, 0, 0, 0}
+	timer := time.NewTimer(time.Duration(timeLimit) * time.Second)
 	for {
-		if q.QuestionIdx == len(q.Problems) {
-			break
+		log.Printf("Question: What is %s ?", q.Problems[q.QuestionIdx].Question)
+		answerCh := make(chan string)
+		go q.askQuestion(answerCh)
+		select {
+		case <-timer.C:
+			log.Printf("Time Up, you scored %v questions right and %v wrong out of %v questions",
+				q.Correct,
+				q.Incorrect,
+				len(q.Problems))
+			return
+		case _ = <-answerCh:
+
 		}
-		q.askQuestion()
+
 	}
-	log.Printf("All done, you got %v questions right and %v wrong", q.Correct, q.Incorrect)
 
 }
-func (q *quiz) askQuestion() {
-	log.Printf("Question: What is %s ?", q.Problems[q.QuestionIdx].Question)
+func (q *quiz) askQuestion(c chan string) {
 	reader := bufio.NewReader(os.Stdin)
 	log.Print("Enter your answer:")
 	text, _ := reader.ReadString('\n')
@@ -48,6 +60,7 @@ func (q *quiz) askQuestion() {
 		q.Incorrect++
 	}
 	q.QuestionIdx++
+	c <- "received" + text
 
 }
 
