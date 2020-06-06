@@ -7,8 +7,42 @@ import (
 	_ "io"
 	_ "io/ioutil"
 	"log"
+	"net/http"
 	"os"
 )
+
+var defaultHanlderTemplater = `
+	<!DOCTYPE html>
+	<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title> Choose Your Own Adventure</title>
+	</head>
+
+	<body>
+		<h1>{{.Title}} </h1>
+		{{range .StoryParagraphs}}
+		<p>{{.}}</p>
+		{{end}}
+		<ul>
+			{{range .Options}}
+			<li><a href="/{{.Chapter}}">{{.Text}}</a></li>
+			{{end}}
+		</ul>
+
+	</body>
+
+	</html>
+	`
+
+func NewHandler(s Story) http.Handler {
+	return nil
+}
+
+type handler struct {
+	
+}
 
 func main() {
 	fmt.Println("hello")
@@ -16,17 +50,26 @@ func main() {
 	if err != nil {
 		log.Panicln(err)
 	}
-	log.Println(s)
+	log.Println(s["denver"])
 }
 
+// Story represents a standar choose your own
+// adventure story. A story consists of chapter keys (strings)
+// which map a chapter name to an instance of a Chapter struct.
 type Story map[string]Chapter
 
+// Chapter represents a possible chatper or route in an adventure.
+// A chapter consits of a title and array of the story points. Finally
+// a chapter has an array of Option structs which the user interacts with
+// to progress the story.
 type Chapter struct {
-	Title   string   `json:"title"`
-	Story   []string `json:"story"`
-	Options []Option `json:"options"`
+	Title           string   `json:"title"`
+	StoryParagraphs []string `json:"story"`
+	Options         []Option `json:"options"`
 }
 
+// Option is a struct that represents the possible options or directions for
+// the story
 type Option struct {
 	Text string `json:"text,omitempty"`
 	Arc  string `json:"arc,omitempty"`
