@@ -1,9 +1,8 @@
-package main
+package cyoa
 
 import (
 	"encoding/json"
 	_ "encoding/json"
-	"fmt"
 	_ "io"
 	_ "io/ioutil"
 	"log"
@@ -41,19 +40,9 @@ func NewHandler(s Story) http.Handler {
 }
 
 type handler struct {
-	
 }
 
-func main() {
-	fmt.Println("hello")
-	s, err := readStory("gopher.json")
-	if err != nil {
-		log.Panicln(err)
-	}
-	log.Println(s["denver"])
-}
-
-// Story represents a standar choose your own
+// Story represents a standard choose your own
 // adventure story. A story consists of chapter keys (strings)
 // which map a chapter name to an instance of a Chapter struct.
 type Story map[string]Chapter
@@ -75,7 +64,7 @@ type Option struct {
 	Arc  string `json:"arc,omitempty"`
 }
 
-func readStory(name string) (Story, error) {
+func ReadStory(name string) (Story, error) {
 	dat, err := os.Open(name)
 	// dat, err := ioutil.ReadFile(name)
 	if err != nil {
