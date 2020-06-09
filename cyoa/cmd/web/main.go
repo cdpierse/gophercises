@@ -1,16 +1,24 @@
 package main
 
 import (
-	"github.com/cdpierse/gophercises/cyoa"
+	"flag"
+	"fmt"
 	"log"
+	"net/http"
+
+	"github.com/cdpierse/gophercises/cyoa"
 )
 
 func main() {
-
-	s, err := cyoa.ReadStory("gopher.json")
+	port := flag.Int("port", 3000, "Port at which to serve CYOA")
+	filename := flag.String("filename", "gopher.json", "Story file from which CYOA game is basedƒ")
+	flag.Parse()
+	story, err := cyoa.ReadStory(*filename)
 	if err != nil {
 		log.Panicln(err)
 	}
-	log.Println(s["denver"])
+
+	h := cyoa.NewHandler(story)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), h))
 
 }
