@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 var defaultHandlerTempl = `
@@ -27,7 +28,7 @@ var defaultHandlerTempl = `
       {{if .Options}}
         <ul>
         {{range .Options}}
-          <li><a href="/">{{.Text}}</a></li>
+		<li><a href="/{{.Chapter}}">{{.Text}}</a></li>
         {{end}}
         </ul>
       {{else}}
@@ -92,9 +93,20 @@ type handler struct {
 }
 
 func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	err := tpl.Execute(w, h.s["intro"])
-	if err != nil {
-		// panic(err)
+	path := strings.TrimSpace(r.URL.Path)
+
+	if path == "" || path == "/" {
+		path = "/intro"
+	}
+
+	path = path[1:]
+
+	if chapter, ok := h.s[path]; ok {
+		err := tpl.Execute(w, chapter)
+		if err != nil {
+			panic(err)
+		}
+
 	}
 
 }
@@ -117,11 +129,11 @@ type Chapter struct {
 // Option is a struct that represents the possible options or directions for
 // the story
 type Option struct {
-	Text string `json:"text"`
-	Arc  string `json:"arc"`
+	Text    string `json:"text"`
+	Chapter string `json:"arc"`
 }
 
-func ReadStory(name string) (Story, error) {
+func ReadJSONStory(name string) (Story, error) {
 	dat, err := os.Open(name)
 	// dat, err := ioutil.ReadFile(name)
 	if err != nil {
@@ -133,7 +145,6 @@ func ReadStory(name string) (Story, error) {
 		return nil, err
 	}
 
-	log.Println(s["intro"].Options)
 	return s, nil
 
 }
